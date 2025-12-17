@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Control Switch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Define color variables to match the desired palette */
+        :root {
+            --bg-dark: #2F323A; /* Dark background */
+            --block-bg: rgba(60, 65, 75, 0.7); /* Slightly lighter, transparent block background */
+            --block-border: rgba(255, 255, 255, 0.08); /* Subtle white border */
+            --text-light: #F0F0F0; /* Light text for main content */
+            --text-dark: #D0D0D0; /* Slightly darker text for less important info */
+            --text-highlight: #FFD700; /* Yellow highlight color */
+            --input-bg: rgba(0, 0, 0, 0.2); /* Dark, transparent input background */
+            --input-border: rgba(255, 255, 255, 0.1); /* Input border */
+            --button-main-bg: #4CAF50; /* Green for Start/ON */
+            --button-danger-bg: #F44336; /* Red for Stop/OFF */
+            --button-reset-bg: #607D8B; /* Grey for general elements */
+            --shadow-soft: rgba(0, 0, 0, 0.3);
+            --shadow-strong: rgba(0, 0, 0, 0.5);
+            --shadow-glow: rgba(255, 215, 0, 0.2); /* Subtle yellow glow for blocks */
+            --header-color: #FFD700; /* Yellow for header text */
+        }
+
+        html, body {
+            height: 100vh; /* Set height to 100% of viewport height */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif; /* Ensure Roboto is applied */
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden !important; /* STRICTLY prevent any scrolling */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            padding: 10px; /* Reduced padding to ensure fit */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Space between major sections */
+            max-width: 1000px; /* Increased max-width for wider blocks */
+            width: 100%;
+            height: 100%; /* Make container fill body height */
+            margin: auto; /* Center the container */
+            flex-grow: 1;
+            /* overflow-y: auto; removed as we want no scroll */
+            /* padding-right: 5px; removed */
+        }
+
+        /* --- Generic Block Styling (for the glass effect) --- */
+        .content-block {
+            background: var(--block-bg);
+            border-radius: 12px;
+            border: 1px solid var(--block-border);
+            box-shadow: 0 4px 15px var(--shadow-soft), 0 0 10px var(--shadow-glow) inset;
+            backdrop-filter: blur(8px);
+            padding: 15px; /* Reduced padding inside blocks */
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+            min-height: 0; /* Allow content to manage height within */
+        }
+
+        .content-block:hover {
+            box-shadow: 0 6px 20px var(--shadow-strong), 0 0 15px var(--shadow-glow) inset;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Header & Navigation --- */
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Stack logo and nav vertically on top */
+            align-items: center;
+            gap: 10px; /* Reduced gap */
+            margin-bottom: 15px; /* Reduced space below header */
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Reduced gap */
+            color: var(--header-color);
+            font-size: 2.2rem; /* Consistent logo emoji size */
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+            padding-bottom: 3px; /* Reduced padding */
+        }
+
+        .logo-svg {
+            height: 38px;
+            width: auto;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px; /* Reduced gap */
+            padding: 8px 0; /* Reduced padding */
+            background: rgba(45, 48, 55, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            width: 100%; /* Make nav buttons take full width of container */
+            max-width: 800px; /* Constrain navigation bar width */
+        }
+
+        .nav-buttons a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem; /* Slightly smaller font */
+            font-weight: 500;
+            padding: 6px 10px; /* Reduced padding */
+            border-radius: 5px;
+            transition: background-color 0.2s, color 0.2s, text-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-buttons a:hover,
+        .nav-buttons a:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--header-color);
+            text-shadow: 0 0 8px var(--shadow-glow);
+        }
+
+        .nav-buttons a.active-link {
+            background-color: rgba(255, 215, 0, 0.15);
+            color: var(--header-color);
+            font-weight: 700;
+            box-shadow: 0 0 8px var(--shadow-glow);
+        }
+
+        /* --- Main Content Styling --- */
+        h2 {
+            color: var(--header-color);
+            text-align: center;
+            font-size: 1.8rem; /* Reduced font size */
+            font-weight: 700;
+            margin-bottom: 8px; /* Reduced margin */
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+        }
+        
+        p { /* Styling for instruction paragraph */
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 15px; /* Space below instructions */
+        }
+        p span { /* Highlighting for keywords in instructions */
+            color: var(--text-highlight);
+            font-weight: bold;
+        }
+
+        #visuals {
+            display: flex;
+            flex-direction: column; /* Main visual sections stacked vertically */
+            gap: 15px; /* Gap between the two main blocks */
+            justify-content: center; /* Center items within visuals */
+            flex-grow: 1; /* Allow visuals section to take remaining height */
+            align-items: center; /* Center horizontally for the main blocks */
+            margin-top: 10px; /* Slightly reduced margin */
+        }
+
+        #interactive-sections { /* New wrapper for LED and Controls/Feedback blocks */
+            display: flex;
+            flex-direction: row; /* Stack horizontally on larger screens */
+            gap: 15px; /* Gap between LED section and controls section */
+            width: 100%; /* Take full width of its parent */
+            flex-grow: 1; /* Allow to grow */
+            align-items: stretch; /* Stretch children to fill height */
+        }
+
+        #led-display-section { /* Left block: LED and Status */
+            flex: 1; /* Allows it to grow and shrink */
+            min-width: 250px; /* Increased min-width for wider appearance */
+            max-width: 50%; /* Max width to ensure controls can fit next to it */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #controls-feedback-section { /* Right block: Buttons and Feedback */
+            flex: 1; /* Allows it to grow and shrink */
+            min-width: 350px; /* Increased min-width for wider appearance, fits buttons better */
+            max-width: 50%; /* Max width */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #light {
+            width: 100px; /* Consistent LED size */
+            height: 100px; /* Consistent LED size */
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px; /* Space below LED */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* Stronger inner shadow when off */
+        }
+
+        .led-circle {
+            width: 70px; /* Consistent LED inner size */
+            height: 70px; /* Consistent LED inner size */
+            border-radius: 50%;
+            background-color: #555;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .led-circle.active {
+            background-color: var(--button-main-bg);
+            box-shadow: 
+                0 0 25px 8px var(--button-main-bg),
+                0 0 12px 4px rgba(255, 255, 255, 0.4) inset,
+                inset 0 0 15px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        #status {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0; /* No margin below status here */
+        }
+
+        /* Group for buttons to center them */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Space between buttons */
+            margin-top: 15px; /* Space above buttons */
+            margin-bottom: 15px; /* Space below buttons */
+            width: 100%;
+        }
+
+        .btn { /* Styling for Start/Stop buttons */
+            background-color: var(--button-main-bg);
+            color: var(--text-light);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px var(--shadow-soft);
+            flex-grow: 1; /* Allow buttons to fill space in their group */
+            max-width: 160px; /* Adjusted max-width for wider buttons */
+        }
+        .btn:hover {
+            background-color: #43a047; /* Darker green on hover */
+            box-shadow: 0 3px 10px var(--shadow-strong);
+        }
+        #stopBtn {
+            background-color: var(--button-danger-bg);
+        }
+        #stopBtn:hover {
+            background-color: #e53935; /* Darker red on hover */
+        }
+
+        #feedback {
+            /* Now exclusively for text within controls-feedback-section */
+            background: none; /* No background here, parent has content-block style */
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin-top: 10px; /* Space between buttons and feedback text */
+            font-size: 1rem;
+            font-weight: 500;
+            display: none; /* Hidden by default, shown by JS */
+            text-align: center;
+            width: 100%; /* Take full width of its parent */
+            box-sizing: border-box;
+        }
+        /* Override for JS `showFeedback` to use its own color */
+        #feedback[style*="color"] { /* Matches the inline style set by JS */
+            color: var(--header-color); /* Default to highlight color unless JS sets explicitly */
+        }
+
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px; /* Further reduced padding */
+            }
+            .container {
+                gap: 10px; /* Further reduced gap */
+                /* Removed overflow-y: auto for container on small screens as we want no scroll */
+            }
+            .header {
+                margin-bottom: 10px; /* Further reduced margin */
+            }
+            .logo-container {
+                font-size: 1.8rem; /* Even smaller emoji */
+            }
+            .nav-buttons {
+                flex-direction: column;
+                gap: 6px;
+                padding: 6px 0;
+            }
+            .nav-buttons a {
+                padding: 5px 8px;
+                font-size: 0.8rem; /* Smallest font for nav */
+            }
+            h2 {
+                font-size: 1.5rem; /* Further reduced h2 */
+                margin-bottom: 5px;
+            }
+            p {
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+            }
+            #visuals {
+                gap: 10px;
+                margin-top: 5px;
+            }
+            #interactive-sections {
+                flex-direction: column; /* Stack vertically on small screens */
+                gap: 10px;
+            }
+            #led-display-section, #controls-feedback-section {
+                min-width: unset; /* Remove min-width to allow full flexibility */
+                max-width: unset; /* Allow full width */
+                width: 100%;
+                padding: 15px; /* Consistent padding */
+            }
+            #led-display-section {
+                min-height: 120px; /* Adjusted min height for small screens */
+            }
+            #controls-feedback-section {
+                min-height: 100px; /* Adjusted min height for small screens */
+            }
+            #light {
+                width: 80px; /* Smallest LED size */
+                height: 80px;
+            }
+            .led-circle {
+                width: 50px;
+                height: 50px;
+            }
+            #status {
+                font-size: 0.9rem;
+            }
+            .button-group {
+                flex-direction: row; /* Keep buttons horizontal on small screens if possible */
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            .btn {
+                max-width: unset; /* Buttons take full width when stacked by flex-wrap */
+                flex-grow: 1; /* Allow them to grow if only one per row */
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            #feedback {
+                font-size: 0.85rem;
+                margin-top: 8px;
+            }
+        }
+
+        @media (max-width: 480px) { /* Even smaller screens */
+            .nav-buttons {
+                gap: 5px;
+            }
+            .nav-buttons a {
+                padding: 4px 6px;
+                font-size: 0.75rem;
+            }
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <svg class="logo-svg" viewBox="0 0 180 80" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="10,60 30,30 50,70 70,20 90,60 110,30 130,60 150,40" stroke="#ffffff" stroke-width="4" fill="none" />
+                </svg>
+                <span class="wave-emoji">🗣️</span> </div>
+            <div class="nav-buttons">
+              <a href="Home.html">Home Overview</a> 
+                <a href="Gesture.html">Gesture Control</a>
+                <a href="Voice.html" class="active-link">Voice Control Switch</a>
+                <a href="interview.html">Interview System</a>
+            </div>
+        </div>
+
+        <h2>🎤 Voice Controlled Light</h2>
+        <p>
+            Say <span style="color:var(--text-highlight);font-weight:bold;">"switch on the light"</span> or <span style="color:var(--text-highlight);font-weight:bold;">"turn on the light"</span> to turn ON.<br>
+            Say <span style="color:var(--text-highlight);font-weight:bold;">"switch off the light"</span> or <span style="color:var(--text-highlight);font-weight:bold;">"turn off the light"</span> to turn OFF.
+        </p>
+
+        <div id="visuals">
+            <div id="interactive-sections"> <div id="led-display-section" class="content-block">
+                    <div id="light">
+                        <div class="led-circle" id="led"></div>
+                    </div>
+                    <div id="status">Status: Idle</div>
+                </div>
+                
+                <div id="controls-feedback-section" class="content-block">
+                    <div class="button-group">
+                        <button class="btn" id="startBtn">Start Listening</button>
+                        <button class="btn" id="stopBtn" style="display:none;">Stop Listening</button>
+                    </div>
+                    <div id="feedback"></div> 
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <script>
+        const led = document.getElementById("led");
+        const status = document.getElementById("status");
+        const feedback = document.getElementById("feedback");
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+
+        let recognition = null;
+        let listening = false;
+
+        function setLed(on) {
+            if (on) {
+                led.classList.add('active');
+            } else {
+                led.classList.remove('active');
+            }
+        }
+
+        // Modified showFeedback to use CSS variables for consistent colors
+        function showFeedback(message, statusType = "info") { // statusType: "success", "error", "warning", "info"
+            let colorVar;
+            switch (statusType) {
+                case "success":
+                    colorVar = getComputedStyle(document.documentElement).getPropertyValue('--button-main-bg');
+                    break;
+                case "error":
+                    colorVar = getComputedStyle(document.documentElement).getPropertyValue('--button-danger-bg');
+                    break;
+                case "warning":
+                    colorVar = getComputedStyle(document.documentElement).getPropertyValue('--text-highlight');
+                    break;
+                default: // info
+                    colorVar = getComputedStyle(document.documentElement).getPropertyValue('--text-light');
+            }
+            feedback.innerText = message;
+            feedback.style.color = colorVar; // Apply the color variable
+            feedback.style.display = 'block';
+            
+            // Remove previous background/border/shadow set by CSS for the general feedback div
+            feedback.style.background = 'none';
+            feedback.style.border = 'none';
+            feedback.style.boxShadow = 'none';
+            feedback.style.padding = '0'; // Remove padding if color is set directly
+
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 3000);
+        }
+
+        function startRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Speech Recognition not supported in this browser. Please use Google Chrome.");
+                return;
+            }
+            if (recognition && listening) return; // Already listening
+
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            listening = true;
+            recognition.start();
+            status.innerText = "Listening...";
+            startBtn.style.display = "none";
+            stopBtn.style.display = "inline-block";
+
+            recognition.onresult = (event) => {
+                let transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                transcript = transcript.trim().replace(/[.?!]/g, "");
+                console.log("Transcript:", transcript);
+
+                const turnOnCommands = ["switch on the light", "turn on the light"];
+                const turnOffCommands = ["switch off the light", "turn off the light"];
+
+                if (turnOnCommands.some(cmd => transcript.includes(cmd))) {
+                    setLed(true);
+                    showFeedback("✅ Light turned ON via voice", "success");
+                    status.innerText = `You said: "${transcript}" (Light ON)`;
+                } else if (turnOffCommands.some(cmd => transcript.includes(cmd))) {
+                    setLed(false);
+                    showFeedback("🛑 Light turned OFF via voice", "error");
+                    status.innerText = `You said: "${transcript}" (Light OFF)`;
+                } else {
+                    status.innerText = `You said: "${transcript}" (Unrecognized command)`;
+                    showFeedback("⚠ Unrecognized voice command", "warning");
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                status.innerText = "Error occurred.";
+                showFeedback(`Speech recognition error: ${event.error}.`, "error");
+            };
+
+            recognition.onend = () => {
+                if (listening) {
+                    recognition.start(); // Restart automatically for continuous listening
+                    status.innerText = "Listening...";
+                } else {
+                    status.innerText = "Stopped listening.";
+                    startBtn.style.display = "inline-block";
+                    stopBtn.style.display = "none";
+                }
+            };
+        }
+
+        function stopRecognition() {
+            if (recognition) {
+                listening = false;
+                recognition.stop();
+                status.innerText = "Stopped listening.";
+                startBtn.style.display = "inline-block";
+                stopBtn.style.display = "none";
+            }
+        }
+
+        startBtn.addEventListener("click", startRecognition);
+        stopBtn.addEventListener("click", stopRecognition);
+    </script>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Systems: AI Unleashed - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> <style>
+        /* Define color variables - consistent with your project theme */
+        :root {
+            --bg-dark: #2F323A; /* Dark background */
+            --block-bg: rgba(60, 65, 75, 0.7); /* Slightly lighter, transparent block background */
+            --block-border: rgba(255, 255, 255, 0.08); /* Subtle white border */
+            --text-light: #F0F0F0; /* Light text for main content */
+            --text-dark: #D0D0D0; /* Slightly darker text for less important info */
+            --text-highlight: #FFD700; /* Yellow highlight color */
+            --button-main-bg: #4CAF50; /* Green */
+            --button-hover-bg: #43a047; /* Darker green */
+            --shadow-soft: rgba(0, 0, 0, 0.3);
+            --shadow-strong: rgba(0, 0, 0, 0.5);
+            --shadow-glow: rgba(255, 215, 0, 0.2); /* Subtle yellow glow for blocks */
+            --header-color: #FFD700; /* Yellow for header text */
+            --accent-blue: #00BFFF; /* A vibrant blue for extra pop */
+        }
+
+        /* Base styles */
+        html, body {
+            height: 100vh; /* Full viewport height */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            overflow-y: auto; /* Allow vertical scrolling for homepage content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px; /* More space between sections on homepage */
+            max-width: 1200px; /* Wider content area */
+            width: 100%;
+            padding: 20px;
+            margin: auto;
+            flex-grow: 1;
+        }
+
+        /* --- Generic Glassmorphism Block Styling --- */
+        .content-block {
+            background: var(--block-bg);
+            border-radius: 15px; /* Slightly more rounded */
+            border: 1px solid var(--block-border);
+            box-shadow: 0 8px 30px var(--shadow-strong), 0 0 15px var(--shadow-glow) inset;
+            backdrop-filter: blur(12px); /* Stronger blur */
+            -webkit-backdrop-filter: blur(12px); /* For Safari support */
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .content-block:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px var(--text-highlight) inset;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px); /* Subtle lift effect */
+        }
+
+        /* --- Header / Hero Section --- */
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(45deg, rgba(47, 50, 58, 0.8), rgba(60, 65, 75, 0.6));
+            border-radius: 15px;
+            border: 1px solid var(--block-border);
+            box-shadow: 0 10px 30px var(--shadow-strong);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        /* Subtle background animation for hero section */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, var(--accent-blue) 0%, transparent 20%),
+                        radial-gradient(circle at bottom right, var(--text-highlight) 0%, transparent 20%);
+            background-size: 80% 80%;
+            mix-blend-mode: overlay; /* Blends colors nicely */
+            opacity: 0.1;
+            animation: backgroundShift 20s infinite alternate ease-in-out;
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes backgroundShift {
+            0% { background-position: 0% 0%, 100% 100%; }
+            100% { background-position: 100% 100%, 0% 0%; }
+        }
+
+        .hero-section h1 {
+            font-family: 'Press Start 2P', cursive; /* Sassy retro font */
+            font-size: 3.5rem;
+            color: var(--header-color);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .hero-section p.slogan {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* --- Navigation Buttons (Reused from other pages, styled for homepage) --- */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px 0;
+            background: rgba(45, 48, 55, 0.85); /* Slightly darker for nav bar */
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+        }
+
+        .nav-buttons a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s, text-shadow 0.3s, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-buttons a:hover,
+        .nav-buttons a:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--header-color);
+            text-shadow: 0 0 10px var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .nav-buttons a.active-link {
+            background-color: rgba(255, 215, 0, 0.2);
+            color: var(--header-color);
+            font-weight: 700;
+            box-shadow: 0 0 12px var(--shadow-glow);
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        /* --- Feature Showcase Section --- */
+        .feature-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 25px;
+            margin-bottom: 30px;
+            padding: 0 10px; /* Small padding to prevent edge issues */
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 25px;
+            min-height: 250px; /* Ensure cards have some height */
+        }
+
+        .feature-card .icon {
+            font-size: 3.5rem; /* Large icons */
+            margin-bottom: 15px;
+            color: var(--accent-blue); /* Distinct color for icons */
+            text-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover .icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.6rem;
+            color: var(--text-highlight);
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            flex-grow: 1; /* Allows description to take available height */
+        }
+
+        .feature-card .explore-btn {
+            background-color: var(--button-main-bg);
+            color: var(--text-light);
+            padding: 10px 25px;
+            border-radius: 50px; /* Pill shape */
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        .feature-card .explore-btn:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        /* --- Team Section --- */
+        .team-section {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+
+        .team-section h2 {
+            font-size: 2.5rem;
+            color: var(--header-color);
+            margin-bottom: 40px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            font-weight: 700;
+        }
+
+        .team-members {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .member-card {
+            background: rgba(60, 65, 75, 0.5); /* Lighter transparent block */
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            text-align: center;
+            width: 220px; /* Fixed width for consistency */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            background: rgba(60, 65, 75, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        }
+
+        .member-card .avatar {
+            font-size: 4rem; /* Large emoji avatar */
+            margin-bottom: 10px;
+        }
+
+        .member-card h3 {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .member-card p.role {
+            font-size: 0.9rem;
+            color: var(--text-highlight);
+            font-weight: 500;
+            font-style: italic;
+        }
+        .member-card p.sassy-line {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: var(--text-dark);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 992px) {
+            .hero-section h1 {
+                font-size: 3rem;
+            }
+            .hero-section p.slogan {
+                font-size: 1.2rem;
+            }
+            .feature-card {
+                padding: 20px;
+                min-height: 220px;
+            }
+            .feature-card .icon {
+                font-size: 3rem;
+            }
+            .feature-card h3 {
+                font-size: 1.4rem;
+            }
+            .feature-card p {
+                font-size: 0.9rem;
+            }
+            .team-section h2 {
+                font-size: 2rem;
+            }
+            .member-card {
+                width: 200px;
+                padding: 15px;
+            }
+            .member-card .avatar {
+                font-size: 3.5rem;
+            }
+            .member-card h3 {
+                font-size: 1.2rem;
+            }
+            .member-card p.role {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                gap: 20px;
+            }
+            .hero-section {
+                padding: 40px 15px;
+            }
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            .hero-section p.slogan {
+                font-size: 1.1rem;
+            }
+            .nav-buttons {
+                flex-direction: column; /* Stack nav buttons vertically */
+                max-width: 100%;
+                gap: 8px;
+            }
+            .nav-buttons a {
+                padding: 8px 15px;
+                font-size: 0.95rem;
+                width: 100%;
+                text-align: center;
+            }
+            .feature-showcase {
+                grid-template-columns: 1fr; /* Single column on small screens */
+                gap: 20px;
+                padding: 0;
+            }
+            .feature-card {
+                padding: 20px;
+                min-height: unset; /* Let height be determined by content */
+            }
+            .feature-card .icon {
+                font-size: 3rem;
+            }
+            .feature-card h3 {
+                font-size: 1.5rem;
+            }
+            .team-section h2 {
+                font-size: 1.8rem;
+            }
+            .team-members {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .member-card {
+                width: 100%;
+                max-width: 280px; /* Constrain width of stacked cards */
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            .hero-section p.slogan {
+                font-size: 0.9rem;
+            }
+            h2 {
+                font-size: 1.6rem;
+            }
+            .feature-card .icon {
+                font-size: 2.5rem;
+            }
+            .feature-card h3 {
+                font-size: 1.3rem;
+            }
+            .feature-card p {
+                font-size: 0.85rem;
+            }
+            .member-card .avatar {
+                font-size: 3rem;
+            }
+            .member-card h3 {
+                font-size: 1.1rem;
+            }
+            .member-card p.role, .member-card p.sassy-line {
+                font-size: 0.8rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>Automated Systems: AI Unleashed</h1>
+                <p class="slogan">Bridging Human Intuition with Intelligent Machines.</p>
+                <div class="nav-buttons">
+                    <a href="Gesture.html">Gesture Control</a>
+                    <a href="Voice.html">Voice Control Switch</a>
+                    <a href="interview.html">Interview System</a>
+                </div>
+            </div>
+        </div>
+
+        <section class="feature-showcase">
+            <div class="feature-card content-block">
+                <span class="icon">🖐️✨</span>
+                <h3>Wave Your World Awake</h3>
+                <p>Beyond touch, beyond voice. Our Gesture Recognition system translates your natural movements into seamless command. Experience AI that truly understands you.</p>
+                <a href="Gesture.html" class="explore-btn">Explore Gesture</a>
+            </div>
+
+            <div class="feature-card content-block">
+                <span class="icon">🗣️💡</span>
+                <h3>Command Your Space, Effortlessly</h3>
+                <p>Harness the power of your voice. Our Voice Control module lets you switch devices on or off with simple spoken commands. Imagine a home or office that responds to your every word.</p>
+                <a href="Voice.html" class="explore-btn">Command with Voice</a>
+            </div>
+
+            <div class="feature-card content-block">
+                <span class="icon">🧠📊</span>
+                <h3>Intelligent Insights, Unveiled</h3>
+                <p>Revolutionize your hiring process. Our AI Interview System transcribes spoken responses, analyzes critical keywords, and provides instant insights for top talent identification.</p>
+                <a href="interview.html" class="explore-btn">Discover Insights</a>
+            </div>
+        </section>
+
+        <section class="team-section">
+            <h2>Meet the Visionaries Behind the Intelligence</h2>
+            <div class="team-members">
+                <div class="member-card">
+                    <span class="avatar">🌟</span>
+                    <h3>Keth</h3>
+                    <p class="role">The Motion Master</p>
+                    <p class="sassy-line">"Crafting intuitive AI, one wave at a time."</p>
+                </div>
+                <div class="member-card">
+                    <span class="avatar">🎤</span>
+                    <h3>Titus</h3>
+                    <p class="role">The Voice Whisperer</p>
+                    <p class="sassy-line">"Giving AI a voice, and a listening ear."</p>
+                </div>
+                <div class="member-card">
+                    <span class="avatar">🔍</span>
+                    <h3>Petro</h3>
+                    <p class="role">The Insight Architect</p>
+                    <p class="sassy-line">"Building systems that reveal the unspoken truths."</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        &copy; 2025 Automated Systems: AI Exploration. All rights reserved. Powered by Petro, Keth & Titus.
+    </footer>
+
+</body>
+</html>

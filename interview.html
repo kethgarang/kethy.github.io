@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlined Interview System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define color variables to match the image's palette */
+        :root {
+            --bg-dark: #2F323A; /* Dark background */
+            --block-bg: rgba(60, 65, 75, 0.7); /* Slightly lighter, transparent block background */
+            --block-border: rgba(255, 255, 255, 0.08); /* Subtle white border */
+            --text-light: #F0F0F0; /* Light text for main content */
+            --text-dark: #D0D0D0; /* Slightly darker text for less important info */
+            --text-highlight: #FFD700; /* Yellow highlight color */
+            --input-bg: rgba(0, 0, 0, 0.2); /* Dark, transparent input background */
+            --input-border: rgba(255, 255, 255, 0.1); /* Input border */
+            --button-main-bg: #4CAF50; /* Green for Start */
+            --button-danger-bg: #F44336; /* Red for Stop/Remove */
+            --button-reset-bg: #607D8B; /* Grey for Reset */
+            --shadow-soft: rgba(0, 0, 0, 0.3);
+            --shadow-strong: rgba(0, 0, 0, 0.5);
+            --shadow-glow: rgba(255, 215, 0, 0.2); /* Subtle yellow glow for blocks */
+            --header-color: #FFD700; /* Yellow for header text */
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box; /* Include padding/border in element's total width and height */
+        }
+
+        body {
+            background-color: var(--bg-dark); /* Solid dark background */
+            color: var(--text-light);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            padding: 20px; /* Overall padding from edges */
+        }
+
+        .container { /* Main app container */
+            display: grid;
+            grid-template-areas:
+                "nav-menu nav-menu" /* New grid area for navigation */
+                "main-controls main-controls"
+                "transcription keywords"
+                "result result";
+            grid-template-columns: 1.5fr 1fr; /* Adjust column width ratio */
+            gap: 20px; /* Increased gap between grid areas for more space */
+            max-width: 1200px;
+            margin: auto; /* Center the container */
+            flex-grow: 1; /* Take up available vertical space */
+            height: 100%; /* Fill parent height */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Removed h1 and .app-title CSS */
+
+        /* --- Navigation Buttons (New Styling for Top Menu) --- */
+        .nav-buttons {
+            grid-area: nav-menu; /* Assign to new grid area */
+            display: flex; /* Horizontal layout */
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 15px; /* Space between links */
+            margin-bottom: 20px; /* Space below menu */
+            padding: 10px 0; /* Padding for the menu row */
+            background: rgba(45, 48, 55, 0.8); /* Slightly darker, semi-transparent background for the menu bar */
+            border-radius: 8px; /* Rounded corners for the menu bar */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        }
+
+        .nav-buttons a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.95rem; /* Smaller font for compactness */
+            font-weight: 500;
+            padding: 8px 12px; /* Padding for clickable area */
+            border-radius: 5px;
+            transition: background-color 0.2s, color 0.2s, text-shadow 0.2s;
+            white-space: nowrap; /* Prevent text wrapping within a link */
+        }
+
+        .nav-buttons a:hover,
+        .nav-buttons a:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--header-color);
+            text-shadow: 0 0 8px var(--shadow-glow);
+        }
+
+        .nav-buttons a.active-link {
+            background-color: rgba(255, 215, 0, 0.15); /* Yellow tint for active */
+            color: var(--header-color);
+            font-weight: 700;
+            box-shadow: 0 0 8px var(--shadow-glow);
+        }
+
+
+        h2 { /* Block titles */
+            color: var(--header-color); /* Yellow color */
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+
+        p { /* General text */
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        /* --- Generic Block Styling --- */
+        .content-block {
+            background: var(--block-bg); /* Use the defined block background */
+            border-radius: 12px;
+            border: 1px solid var(--block-border); /* Subtle border */
+            box-shadow: 0 4px 15px var(--shadow-soft), 0 0 10px var(--shadow-glow) inset; /* Soft outer shadow, inner glow */
+            backdrop-filter: blur(8px); /* Strong blur effect */
+            padding: 20px; /* Padding inside blocks */
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+            min-height: 0; /* Allow content to manage height within */
+        }
+
+        .content-block:hover {
+            box-shadow: 0 6px 20px var(--shadow-strong), 0 0 15px var(--shadow-glow) inset; /* Stronger hover effect */
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Main Control Buttons (Start/Stop/Reset) --- */
+        .main-controls {
+            grid-area: main-controls;
+            display: flex;
+            justify-content: center; /* Center the buttons */
+            gap: 15px; /* Space between buttons */
+            padding: 15px; /* Padding around buttons */
+            background: var(--block-bg); /* Match block style */
+            border-radius: 12px;
+            border: 1px solid var(--block-border);
+            box-shadow: 0 4px 15px var(--shadow-soft), 0 0 10px var(--shadow-glow) inset;
+            backdrop-filter: blur(8px);
+            margin-bottom: 20px;
+        }
+
+        .main-controls button {
+            background-color: #555860; /* Darker grey button background */
+            color: var(--text-light);
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px; /* Slightly more rounded */
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px var(--shadow-soft); /* Subtle button shadow */
+            min-width: 140px; /* Wider buttons */
+        }
+
+        .main-controls button:hover {
+            background-color: #656973;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px var(--shadow-strong);
+        }
+        .main-controls button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 5px var(--shadow-soft);
+        }
+        .main-controls button:disabled {
+            background-color: rgba(85, 88, 96, 0.5); /* Semi-transparent disabled */
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #startButton { background-color: var(--button-main-bg); }
+        #startButton:hover { background-color: #4CAF50; } /* Keep green specific */
+        #stopButton { background-color: var(--button-danger-bg); }
+        #stopButton:hover { background-color: #F44336; }
+        #resetButton { background-color: var(--button-reset-bg); }
+        #resetButton:hover { background-color: #546E7A; }
+
+
+        /* --- Transcription Block --- */
+        .transcription-block {
+            grid-area: transcription;
+            /* Adjust height based on new container layout, giving more space */
+            height: calc(100% - 20px); /* Fill remaining height, account for padding */
+            max-height: 500px; /* Allowed to be taller */
+            min-height: 250px; /* Minimum height for visibility */
+        }
+        #transcription {
+            background-color: rgba(0, 0, 0, 0.3); /* Darker, more opaque inner background */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            flex-grow: 1; /* Take all available height */
+            overflow-y: auto; /* Scrollable content */
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-light);
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4); /* Inner shadow for depth */
+        }
+        #transcription p {
+            text-align: left;
+            margin: 0;
+            color: var(--text-light);
+        }
+
+
+        /* --- Keywords Block --- */
+        .keywords-block {
+            grid-area: keywords;
+            /* Increased height */
+            height: calc(100% - 20px); /* Fill remaining height, account for padding */
+            max-height: none; /* Removed max-height to allow more expansion */
+            min-height: 250px; /* Increased minimum height for visibility */
+        }
+        #keywordsList { /* Container for keyword blocks */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; /* Space between keyword blocks */
+            padding: 0;
+            margin: 0; /* Remove default margins */
+            list-style: none;
+            flex-grow: 1; /* Take available height */
+            overflow-y: auto; /* Scrollable if many keywords */
+            align-content: flex-start; /* Align blocks to top of container */
+            border: 1px solid rgba(255,255,255,0.05); /* Added for debugging visibility */
+            border-radius: 8px;
+            padding: 10px; /* Added for debugging visibility */
+            box-sizing: border-box; /* Include padding in height */
+        }
+
+        .keyword-edit-block {
+            background-color: rgba(255, 255, 255, 0.08); /* Lighter transparent block */
+            padding: 8px 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px var(--shadow-soft);
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: row; /* Ensure horizontal by default */
+            align-items: center;
+            gap: 5px;
+            /* Make keyword blocks take full width on larger screens by default */
+            flex-basis: 100%; 
+            flex-grow: 1; /* Allow blocks to grow */
+            flex-shrink: 0; /* Prevent blocks from shrinking, ensures content is always visible */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+        .keyword-edit-block:hover {
+            box-shadow: 0 2px 6px var(--shadow-strong);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .keyword-edit-block input[type="text"],
+        .keyword-edit-block input[type="number"] {
+            background: rgba(0, 0, 0, 0.1); /* Darker, subtle input background */
+            color: var(--text-light);
+            padding: 4px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: border-color 0.2s, background-color 0.2s;
+            flex-grow: 1; /* Allow text input to grow */
+            margin-bottom: 0; /* Reset for desktop */
+        }
+        .keyword-edit-block input[type="text"]:focus,
+        .keyword-edit-block input[type="number"]:focus {
+            border-color: var(--header-color); /* Yellow focus border */
+            background-color: rgba(255, 215, 0, 0.08); /* Subtle yellow background on focus */
+            outline: none;
+        }
+        .keyword-edit-block input[type="number"] {
+            width: 45px;
+            text-align: center;
+            flex-shrink: 0; /* Prevent number input from shrinking */
+        }
+
+        .keyword-edit-block button.remove-keyword-button {
+            background-color: var(--button-danger-bg); /* Red for remove */
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 5px;
+            box-shadow: none;
+            flex-shrink: 0;
+            opacity: 0.8; /* Slightly transparent */
+            transition: opacity 0.2s;
+            margin-top: 0; /* Reset for desktop */
+        }
+        .keyword-edit-block button.remove-keyword-button:hover {
+            opacity: 1;
+        }
+
+        .add-keyword-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px; /* Space from keywords list */
+            align-items: center;
+            background-color: rgba(76, 175, 80, 0.15); /* Greenish transparent background */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed rgba(76, 175, 80, 0.3);
+            flex-shrink: 0; /* Prevent form from shrinking away */
+        }
+        .add-keyword-form input {
+            background: rgba(0, 0, 0, 0.15);
+            color: var(--text-light);
+            padding: 8px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+        .add-keyword-form button {
+            background-color: var(--button-main-bg); /* Green for Add */
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin: 0;
+            min-width: unset;
+            box-shadow: none;
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        .add-keyword-form button:hover {
+            background-color: #218838;
+        }
+        .keywords-info-text {
+            display: block;
+            margin-top: 10px;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        #keywordsList p.no-keywords {
+            width: 100%;
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            margin: auto; /* Center vertically if container is tall */
+            padding: 20px 0; /* Add padding for better spacing */
+        }
+
+        /* --- Result Block --- */
+        .result-block {
+            grid-area: result;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 25px; /* More horizontal padding */
+            border: 2px dashed var(--header-color); /* Yellow dashed border */
+            background-color: rgba(255, 215, 0, 0.08); /* Subtle yellow background */
+            border-radius: 12px;
+            min-height: 80px; /* Ensure it's visible */
+            box-shadow: 0 0 15px var(--shadow-glow); /* Result specific glow */
+        }
+        #result {
+            margin: 0; /* Remove default margin */
+            font-weight: 500;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: var(--text-light);
+            text-align: center;
+            width: 100%; /* Ensure text centers */
+        }
+        #result strong {
+            color: var(--header-color);
+            font-weight: 700;
+        }
+        #result p {
+            margin: 0;
+            color: inherit;
+        }
+
+        /* --- Highlighted Keywords in Transcription --- */
+        .matched-keyword-in-transcript {
+            background-color: rgba(255, 215, 0, 0.3); /* Softer yellow highlight */
+            color: #fff;
+            font-weight: 600;
+            padding: 1px 4px;
+            border-radius: 3px;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); /* Glowing effect */
+            display: inline-block;
+            margin: 0 1px;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-areas:
+                    "nav-menu"
+                    "main-controls"
+                    "transcription"
+                    "keywords"
+                    "result";
+                grid-template-columns: 1fr; /* Single column layout */
+                padding: 15px;
+                gap: 15px; /* Adjusted gap for smaller screens */
+                max-width: 95%; /* Adjust for smaller screens */
+            }
+            /* Removed h1 font size adjustment */
+            .nav-buttons {
+                gap: 10px;
+                padding: 8px 0;
+            }
+            .nav-buttons a {
+                font-size: 0.85rem;
+                padding: 6px 10px;
+                flex-grow: 1; /* Allow links to stretch and fill space */
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+            .content-block {
+                padding: 15px;
+            }
+            .transcription-block, .keywords-block {
+                max-height: 350px; /* Adjusted max height for vertical stacking */
+                min-height: 200px; /* Ensure minimum height */
+            }
+            .main-controls {
+                flex-wrap: wrap; /* Allow buttons to wrap */
+                justify-content: center;
+            }
+            .main-controls button {
+                flex-grow: 1; /* Make buttons fill available width */
+                min-width: unset;
+                max-width: 48%; /* To allow two buttons per row */
+            }
+            .add-keyword-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .add-keyword-form input, .add-keyword-form button {
+                width: 100%;
+                margin-bottom: 8px; /* Add space between stacked inputs/buttons */
+            }
+            .add-keyword-form button:last-child {
+                    margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 10px;
+                gap: 10px;
+            }
+            /* Removed h1 font size adjustment */
+            .nav-buttons {
+                flex-direction: column; /* Stack menu items vertically */
+                align-items: stretch;
+                gap: 5px;
+                padding: 5px 0;
+            }
+            .nav-buttons a {
+                width: 100%;
+                text-align: center;
+                margin: 0;
+                padding: 5px 0;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+            .content-block {
+                padding: 12px;
+            }
+            .main-controls {
+                padding: 10px;
+                gap: 10px;
+            }
+            .main-controls button {
+                max-width: unset; /* Allow full width stacking */
+            }
+            .keyword-edit-block {
+                flex-direction: column; /* Stack elements within keyword block */
+                align-items: stretch;
+                flex-basis: 100%; /* Single column */
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            .keyword-edit-block input {
+                width: auto; /* Reset width for stacking */
+                margin-bottom: 5px; /* Add margin for stacking */
+            }
+            .keyword-edit-block button.remove-keyword-button {
+                width: 100%;
+                margin-top: 5px; /* Add margin for stacking */
+            }
+            .add-keyword-form {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+              <a href="Home.html">Home Overview</a> 
+            <a href="Gesture.html">Gesture Control</a>
+            <a href="Voice.html">Voice Control Switch</a>
+            <a href="interview.html" class="active-link">Interview System</a>
+        </div>
+
+        <div class="main-controls">
+            <button id="startButton">Start Interview</button>
+            <button id="stopButton" disabled>Stop Interview</button>
+            <button id="resetButton">Reset</button>
+        </div>
+
+        <div class="content-block transcription-block">
+            <h2>Transcription:</h2>
+            <div id="transcription">
+                <p>Speak here...</p>
+            </div>
+        </div>
+
+        <div class="content-block keywords-block">
+            <h2>Current Keywords:</h2>
+            <div id="keywordsList">
+                </div>
+            <div class="add-keyword-form">
+                <input type="text" id="newKeywordInput" placeholder="New keyword" />
+                <input type="number" id="newKeywordWeightInput" value="1" min="1" max="10" title="Weight (1-10)" />
+                <button id="addKeywordButton">Add Keyword</button>
+            </div>
+            <small class="keywords-info-text">Higher weights = more impact. Edit or remove directly above.</small>
+        </div>
+
+        <div class="content-block result-block">
+            <div id="result">
+                <p>Interview status will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for Web Speech API compatibility
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Web Speech API is not supported in this browser. Please use Google Chrome.");
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = true;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton');
+        const transcriptionDiv = document.getElementById('transcription');
+        const resultDiv = document.getElementById('result');
+
+        const keywordsListContainer = document.getElementById('keywordsList');
+        const newKeywordInput = document.getElementById('newKeywordInput');
+        const newKeywordWeightInput = document.getElementById('newKeywordWeightInput');
+        const addKeywordButton = document.getElementById('addKeywordButton');
+
+        let currentKeywords = []; // Initialize as empty, will load from local storage
+
+        let finalTranscript = '';
+        let matchedKeywordsText = new Set();
+        let totalMatchedWeight = 0;
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        // --- Local Storage Functions ---
+        function saveKeywords() {
+            localStorage.setItem('interviewKeywords', JSON.stringify(currentKeywords));
+        }
+
+        function loadKeywords() {
+            const storedKeywords = localStorage.getItem('interviewKeywords');
+            if (storedKeywords) {
+                currentKeywords = JSON.parse(storedKeywords);
+            } else {
+                // Default keywords if nothing in local storage (first time load)
+                currentKeywords = [
+                    { text: "JavaScript", weight: 3 },
+                    { text: "Python", weight: 3 },
+                    { text: "API", weight: 2 },
+                    { text: "Cloud", weight: 4 },
+                    { text: "Database", weight: 2 },
+                    { text: "React", weight: 5 },
+                    { text: "DevOps", weight: 4 },
+                    { text: "Agile", weight: 1 },
+                    { text: "Machine Learning", weight: 5 },
+                    { text: "Cybersecurity", weight: 4 }
+                ];
+            }
+        }
+
+        // --- Keyword Management Functions ---
+
+        function renderKeywords() {
+            keywordsListContainer.innerHTML = ''; // Clear the display container
+
+            if (currentKeywords.length === 0) {
+                const noKeywordsP = document.createElement('p');
+                noKeywordsP.className = 'no-keywords';
+                noKeywordsP.textContent = 'No keywords defined. Use the form below to add some!';
+                keywordsListContainer.appendChild(noKeywordsP);
+                return;
+            }
+
+            currentKeywords.forEach((kw, index) => {
+                const keywordEditBlock = document.createElement('div');
+                keywordEditBlock.className = 'keyword-edit-block';
+                keywordEditBlock.innerHTML = `
+                    <input type="text" value="${kw.text}" data-index="${index}" class="edit-keyword-text" />
+                    <input type="number" value="${kw.weight}" min="1" max="10" data-index="${index}" class="edit-keyword-weight" />
+                    <button data-index="${index}" class="remove-keyword-button">Remove</button>
+                `;
+                keywordsListContainer.appendChild(keywordEditBlock);
+            });
+
+            // Attach event listeners after elements are created
+            keywordsListContainer.querySelectorAll('.edit-keyword-text').forEach(input => {
+                input.addEventListener('change', updateKeyword);
+            });
+            keywordsListContainer.querySelectorAll('.edit-keyword-weight').forEach(input => {
+                input.addEventListener('change', updateKeyword);
+            });
+            keywordsListContainer.querySelectorAll('.remove-keyword-button').forEach(button => {
+                button.addEventListener('click', removeKeyword);
+            });
+        }
+
+        function addKeyword() {
+            const text = newKeywordInput.value.trim();
+            const weight = parseInt(newKeywordWeightInput.value, 10);
+
+            if (!text) {
+                alert('Keyword text cannot be empty.');
+                return;
+            }
+            if (isNaN(weight) || weight < 1 || weight > 10) {
+                alert('Weight must be a number between 1 and 10.');
+                return;
+            }
+
+            const exists = currentKeywords.some(kw => kw.text.toLowerCase() === text.toLowerCase());
+            if (exists) {
+                alert('This keyword already exists!');
+                return;
+            }
+            
+            currentKeywords.push({ text: text, weight: weight });
+            newKeywordInput.value = '';
+            newKeywordWeightInput.value = '1';
+            saveKeywords(); // Save to local storage
+            renderKeywords();
+        }
+
+        function updateKeyword(event) {
+            const index = parseInt(event.target.dataset.index, 10);
+            if (event.target.classList.contains('edit-keyword-text')) {
+                const newText = event.target.value.trim();
+                if (!newText) {
+                    alert('Keyword text cannot be empty.');
+                    event.target.value = currentKeywords[index].text; // Revert to old value
+                    return;
+                }
+                const exists = currentKeywords.some((kw, i) => i !== index && kw.text.toLowerCase() === newText.toLowerCase());
+                if (exists) {
+                    alert('Keyword text cannot be a duplicate of another keyword.');
+                    event.target.value = currentKeywords[index].text; // Revert to old value
+                    return;
+                }
+                currentKeywords[index].text = newText;
+            } else if (event.target.classList.contains('edit-keyword-weight')) {
+                const newWeight = parseInt(event.target.value, 10);
+                if (isNaN(newWeight) || newWeight < 1 || newWeight > 10) {
+                    alert('Weight must be between 1 and 10.');
+                    event.target.value = currentKeywords[index].weight; // Revert to old value
+                    return;
+                }
+                currentKeywords[index].weight = newWeight;
+            }
+            saveKeywords(); // Save to local storage
+        }
+
+        function removeKeyword(event) {
+            const index = parseInt(event.target.dataset.index, 10);
+            currentKeywords.splice(index, 1);
+            saveKeywords(); // Save to local storage
+            renderKeywords();
+        }
+
+        // --- Speech Recognition Functions ---
+
+        recognition.onstart = () => {
+            console.log('Speech recognition started.');
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            transcriptionDiv.innerHTML = '<p>Listening...</p>';
+            resultDiv.innerHTML = '<p>Interview in progress...</p>';
+            finalTranscript = '';
+            matchedKeywordsText.clear();
+            totalMatchedWeight = 0;
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    const processedSegment = highlightKeywordsInText(transcript);
+                    finalTranscript += processedSegment + ' ';
+                    checkKeywords(transcript);
+                } else {
+                    interimTranscript += highlightKeywordsInText(transcript);
+                }
+            }
+            // Update the transcription display: final text + current interim text
+            transcriptionDiv.innerHTML = `<p>${finalTranscript}<strong>${interimTranscript}</strong></p>`;
+            transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight; // Auto-scroll
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            transcriptionDiv.innerHTML = `<p style="color: var(--button-danger-bg);">Error: ${event.error}. Please ensure microphone is connected and permissions granted.</p>`;
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            resultDiv.innerHTML = '<p style="color: var(--button-danger-bg);">Interview stopped due to an error.</p>';
+        };
+
+        recognition.onend = () => {
+            console.log('Speech recognition ended.');
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            evaluateInterview();
+        };
+
+        function checkKeywords(text) {
+            const lowerCaseText = text.toLowerCase();
+            currentKeywords.forEach(kw => {
+                // Use word boundaries for more accurate matching
+                const regex = new RegExp(`\\b${kw.text.toLowerCase()}\\b`, 'g'); 
+                if (regex.test(lowerCaseText)) {
+                    // Check if the exact keyword (case-insensitive) has already been matched
+                    if (!matchedKeywordsText.has(kw.text.toLowerCase())) {
+                        matchedKeywordsText.add(kw.text.toLowerCase());
+                        totalMatchedWeight += kw.weight;
+                    }
+                }
+            });
+        }
+
+        function highlightKeywordsInText(text) {
+            let highlightedText = text;
+            currentKeywords.forEach(kw => {
+                // 'gi' for global and case-insensitive replacement
+                const regex = new RegExp(`\\b(${kw.text})\\b`, 'gi'); 
+                highlightedText = highlightedText.replace(regex, `<span class="matched-keyword-in-transcript">$1</span>`);
+            });
+            return highlightedText;
+        }
+
+        function evaluateInterview() {
+            if (currentKeywords.length === 0) {
+                resultDiv.innerHTML = `<p>No keywords defined for evaluation. Please add some in the "Current Keywords" section.</p>`;
+                return;
+            }
+
+            const maxPossibleWeight = currentKeywords.reduce((sum, kw) => sum + kw.weight, 0);
+            const score = maxPossibleWeight > 0 ? (totalMatchedWeight / maxPossibleWeight) * 100 : 0;
+
+            let message = `<p>Interview Ended.</p>`;
+            message += `<p>Total possible keyword weight: <strong>${maxPossibleWeight}</strong></p>`;
+            message += `<p>Achieved keyword weight: <strong>${totalMatchedWeight}</strong></p>`;
+            message += `<p>Score: <strong>${score.toFixed(2)}%</strong></p>`;
+
+            if (score >= 60) {
+                message += `<p style="color: var(--button-main-bg);"><strong>Verdict: This person seems good for the job!</strong></p>`;
+            } else {
+                message += `<p style="color: var(--header-color);"><strong>Verdict: Needs more relevant keywords or further evaluation.</strong></p>`;
+            }
+            resultDiv.innerHTML = message;
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', () => {
+            if (currentKeywords.length === 0) {
+                alert("Please add some keywords before starting the interview!");
+                return;
+            }
+            finalTranscript = '';
+            matchedKeywordsText.clear();
+            totalMatchedWeight = 0;
+            transcriptionDiv.innerHTML = '<p>Preparing to listen...</p>';
+            resultDiv.innerHTML = '<p>Interview in progress...</p>';
+            recognition.start();
+        });
+
+        stopButton.addEventListener('click', () => {
+            recognition.stop();
+        });
+
+        resetButton.addEventListener('click', () => {
+            recognition.stop(); // Ensure recognition is stopped
+            finalTranscript = '';
+            matchedKeywordsText.clear();
+            totalMatchedWeight = 0;
+            transcriptionDiv.innerHTML = '<p>Speak here...</p>';
+            resultDiv.innerHTML = '<p>Interview status will appear here.</p>';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            console.log('System reset.');
+        });
+
+        addKeywordButton.addEventListener('click', addKeyword);
+        // Allow adding keyword with Enter key in input fields
+        newKeywordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addKeyword();
+            }
+        });
+        newKeywordWeightInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addKeyword();
+            }
+        });
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadKeywords(); // Load keywords from local storage
+            renderKeywords(); // Render them to the UI
+        });
+    </script>
+</body>
+</html>
